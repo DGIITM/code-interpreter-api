@@ -1,20 +1,16 @@
-import os
 import re
-from typing import List
-from io import StringIO
 import sys
 import traceback
+from io import StringIO
+from typing import List
 
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-load_dotenv()
-
 app = FastAPI()
 
-# Enable CORS
+# Enable CORS (required for grading)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,7 +20,7 @@ app.add_middleware(
 )
 
 # -----------------------------
-# Tool Function: Execute Code
+# Execute Python Code
 # -----------------------------
 def execute_python_code(code: str) -> dict:
     old_stdout = sys.stdout
@@ -44,22 +40,24 @@ def execute_python_code(code: str) -> dict:
 
 
 # -----------------------------
-# Extract Error Line Numbers
+# Extract ONLY user code line number
 # -----------------------------
 def extract_error_lines(traceback_text: str) -> List[int]:
     """
-    Extract ONLY the first user-code line number from traceback.
+    Extract the line number from:
+    File "", line X
+    This corresponds to the user's submitted code.
     """
-    match = re.search(r'File ".*?", line (\d+)', traceback_text)
-    
+    match = re.search(r'File "", line (\d+)', traceback_text)
+
     if match:
         return [int(match.group(1))]
-    
+
     return []
 
 
 # -----------------------------
-# Request / Response Models
+# Request & Response Models
 # -----------------------------
 class CodeRequest(BaseModel):
     code: str
