@@ -48,10 +48,14 @@ def execute_python_code(code: str) -> dict:
 # -----------------------------
 def extract_error_lines(traceback_text: str) -> List[int]:
     """
-    Extract line numbers from Python traceback.
+    Extract ONLY the first user-code line number from traceback.
     """
-    line_numbers = re.findall(r'line (\d+)', traceback_text)
-    return list(sorted(set(int(num) for num in line_numbers)))
+    match = re.search(r'File ".*?", line (\d+)', traceback_text)
+    
+    if match:
+        return [int(match.group(1))]
+    
+    return []
 
 
 # -----------------------------
